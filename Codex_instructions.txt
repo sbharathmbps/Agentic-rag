@@ -1,0 +1,45 @@
+Project Overview: Healthcare Information Agent
+
+We are building a production-style Agentic AI backend using FastAPI, LangGraph, LangChain, Gemini API, Tavily Web Search, FAISS/Vector DB, and LangSmith.
+
+The application is a healthcare information assistant, not an AI doctor. It should provide general health and medicine information safely, using RAG for internal medicine documents and Tavily web search for latest/general health queries from trusted sources.
+
+Core idea:
+- If the user asks about a medicine, its uses, side effects, warnings, contraindications, or interactions, use RAG from the local vector database.
+- If the user asks about symptoms, latest guidelines, public health updates, or current medical information, use Tavily web search.
+- If the question needs both internal medicine info and latest information, use both RAG and web search.
+- If the query is unsafe, such as emergency symptoms, self-harm, diagnosis request, prescription request, or personalized dosage request, route to a safe response instead of giving medical advice.
+
+Planned LangGraph flow:
+User question
+→ Safety Classifier
+→ Intent Planner
+→ Query Rewriter
+→ RAG Retriever and/or Web Search
+→ Evidence Evaluator
+→ Answer Generator
+→ Answer Verifier
+→ Final Response
+
+Important safety rules:
+- Do not diagnose the user.
+- Do not prescribe medicines.
+- Do not give personalized dosage.
+- Do not replace a doctor or pharmacist.
+- Escalate emergencies clearly.
+- Include medical disclaimers where appropriate.
+- Prefer trusted healthcare sources for web search.
+
+Architecture rules:
+- Graph construction belongs in app/graph.
+- Node logic belongs in app/nodes.
+- Tool wrappers belong in app/tools.
+- LLM setup belongs in app/llm.
+- Prompts belong in app/prompts.
+- Config and environment loading belongs in app/config.
+- FastAPI routes belong in app/api.
+- Do not hardcode API keys.
+- Use .env through settings.
+
+Current instruction:
+Do not generate or modify any code yet. This is only the application overview. I will guide you step by step and give specific implementation tasks manually.
