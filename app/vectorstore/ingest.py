@@ -1,8 +1,5 @@
 """
-Document load
-Text split
-Embedding
-Vector store creation
+Fetch medicine labels, convert them to documents, and split them into chunks.
 """
 import os
 from typing import Any, Dict, List
@@ -12,20 +9,15 @@ import requests
 from dotenv import load_dotenv
 
 from langchain_core.documents import Document
-from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from app.vectorstore.faiss_store import save_vector_store
 
 
 load_dotenv()
 
 
 OPENFDA_LABEL_URL = "https://api.fda.gov/drug/label.json"
-
-VECTOR_STORE_PATH = "vector_store/medicine_faiss"
-
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-
 
 # For version 1, keep this list controlled.
 # We can later expand to 50, 100, or full openFDA dataset ingestion.
@@ -290,43 +282,6 @@ def chunk_documents(documents: List[Document]) -> List[Document]:
         chunk.metadata["chunk_id"] = index
 
     return chunks
-
-
-def get_embedding_model() -> HuggingFaceEmbeddings:
-    """
-    Uses a local free embedding model.
-    First run will download the model.
-    """
-
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
-    )
-
-
-def save_vector_store(chunks: List[Document]) -> None:
-    """
-    Creates and saves the FAISS vector store.
-    """
-
-    if not chunks:
-        raise ValueError("No chunks available. Cannot create vector store.")
-
-    print(f"[INFO] Creating embeddings for {len(chunks)} chunks...")
-
-    embeddings = get_embedding_model()
-
-    vector_store = FAISS.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-    )
-
-    os.makedirs(VECTOR_STORE_PATH, exist_ok=True)
-
-    vector_store.save_local(VECTOR_STORE_PATH)
-
-    print(f"[SUCCESS] FAISS vector store saved at: {VECTOR_STORE_PATH}")
 
 
 def main() -> None:
