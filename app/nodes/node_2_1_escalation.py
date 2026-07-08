@@ -5,7 +5,7 @@ from langchain_core.messages import AIMessage
 from app.graph.state import GraphState
 
 
-ESCALATION_RESPONSES = {
+ESCALATION_RESPONSES = { 
     "emergency": (
         "This may require urgent medical attention. Please contact your local "
         "emergency services or go to the nearest emergency department now. "

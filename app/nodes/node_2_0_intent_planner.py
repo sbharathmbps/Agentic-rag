@@ -11,7 +11,7 @@ from app.prompts.intent_planner import INTENT_PLANNER_SYSTEM_PROMPT
 from app.utils.messages import format_conversation
 
 
-Route = Literal["rag_only", "web_only", "rag_and_web", "direct_answer"]
+Route = Literal["rag_only", "web_only", "rag_and_web"]
 
 
 class IntentPlan(BaseModel):
@@ -28,7 +28,7 @@ def _fallback_route(safety_category: str) -> Route:
     """Choose a conservative route if structured planning is unavailable."""
 
     if safety_category in {"medicine_info", "drug_interaction"}:
-        return "web_only"
+        return "rag_only"
 
     if safety_category in {
         "symptom_info",
@@ -37,7 +37,7 @@ def _fallback_route(safety_category: str) -> Route:
     }:
         return "web_only"
 
-    return "direct_answer"
+    return "web_only"
 
 
 def intent_planner_node(state: GraphState) -> dict[str, str]:
@@ -48,7 +48,7 @@ def intent_planner_node(state: GraphState) -> dict[str, str]:
 
     if not user_query:
         return {
-            "route": "direct_answer",
+            "route": "web_only",
             "planner_reason": "No user query was provided.",
         }
 
