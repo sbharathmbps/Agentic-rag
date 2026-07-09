@@ -1,0 +1,47 @@
+---
+config:
+  flowchart:
+    curve: basis
+  theme: base
+  themeVariables:
+    fontFamily: Inter, Arial, sans-serif
+    lineColor: '#64748B'
+    primaryBorderColor: '#6366F1'
+    primaryColor: '#EEF2FF'
+    primaryTextColor: '#111827'
+    secondaryColor: '#ECFDF5'
+    tertiaryColor: '#FFF7ED'
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	safety_classifier(safety_classifier)
+	escalation(escalation)
+	intent_planner(intent_planner)
+	query_rewriter(query_rewriter)
+	rag_retriever(rag_retriever)
+	web_search(web_search)
+	evidence_evaluator(evidence_evaluator)
+	answer_generator(answer_generator)
+	answer_verifier(answer_verifier)
+	answer_revision(answer_revision)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> safety_classifier;
+	answer_generator --> answer_verifier;
+	answer_revision --> answer_verifier;
+	answer_verifier -. &nbsp;pass_or_max_revisions&nbsp; .-> __end__;
+	answer_verifier -. &nbsp;revise_answer&nbsp; .-> answer_revision;
+	evidence_evaluator -. &nbsp;answer_with_available_evidence&nbsp; .-> answer_generator;
+	evidence_evaluator -. &nbsp;weak_rag_try_web&nbsp; .-> web_search;
+	intent_planner --> query_rewriter;
+	query_rewriter -. &nbsp;rag_and_web_to_rag&nbsp; .-> rag_retriever;
+	query_rewriter -. &nbsp;fallback_to_web&nbsp; .-> web_search;
+	rag_retriever -. &nbsp;rag_only_evaluate&nbsp; .-> evidence_evaluator;
+	rag_retriever -. &nbsp;rag_and_web_continue_web&nbsp; .-> web_search;
+	safety_classifier -. &nbsp;unsafe_escalate&nbsp; .-> escalation;
+	safety_classifier -. &nbsp;safe_continue&nbsp; .-> intent_planner;
+	web_search -. &nbsp;rag_fallback_answer&nbsp; .-> answer_generator;
+	web_search -. &nbsp;evaluate_web_evidence&nbsp; .-> evidence_evaluator;
+	escalation --> __end__;
+	classDef default fill:#EEF2FF,stroke:#6366F1,color:#111827,line-height:1.25
+	classDef first fill:#DCFCE7,stroke:#16A34A,color:#052E16
+	classDef last fill:#FFE4E6,stroke:#E11D48,color:#4C0519

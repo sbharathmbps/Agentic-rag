@@ -44,8 +44,8 @@ def build_graph():
     graph.add_conditional_edges(
         "safety_classifier", route_after_safety_classifier,
         {
-            "escalation": "escalation",
-            "intent_planner": "intent_planner",
+            "unsafe_escalate": "escalation",
+            "safe_continue": "intent_planner",
         },
     )
     graph.add_edge("escalation", END)
@@ -54,32 +54,34 @@ def build_graph():
         "query_rewriter",
         route_after_query_rewriter,
         {
-            "rag_retriever": "rag_retriever",
-            "web_search": "web_search"
+            "rag_only_to_rag": "rag_retriever",
+            "rag_and_web_to_rag": "rag_retriever",
+            "web_only_to_web": "web_search",
+            "fallback_to_web": "web_search",
         },
     )
     graph.add_conditional_edges(
         "rag_retriever",
         route_after_rag_retriever,
         {
-            "evidence_evaluator": "evidence_evaluator",
-            "web_search": "web_search",
+            "rag_only_evaluate": "evidence_evaluator",
+            "rag_and_web_continue_web": "web_search",
         },
     )
     graph.add_conditional_edges(
         "web_search",
         route_after_web_search,
         {
-            "evidence_evaluator": "evidence_evaluator",
-            "answer_generator": "answer_generator",
+            "evaluate_web_evidence": "evidence_evaluator",
+            "rag_fallback_answer": "answer_generator",
         },
     )    
     graph.add_conditional_edges(
         "evidence_evaluator",
         route_after_evidence_evaluator,
         {
-            "web_search": "web_search",
-            "answer_generator": "answer_generator",
+            "weak_rag_try_web": "web_search",
+            "answer_with_available_evidence": "answer_generator",
         },
     )
     graph.add_edge("answer_generator", "answer_verifier")
@@ -87,8 +89,8 @@ def build_graph():
         "answer_verifier",
         route_after_answer_verifier,
         {
-            "answer_revision": "answer_revision",
-            "end": END,
+            "revise_answer": "answer_revision",
+            "pass_or_max_revisions": END,
         },
     )
     graph.add_edge("answer_revision", "answer_verifier")
