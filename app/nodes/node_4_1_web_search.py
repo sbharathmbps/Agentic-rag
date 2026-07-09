@@ -38,7 +38,11 @@ def _format_web_result(result: dict) -> dict:
 def web_search_node(state: GraphState) -> dict[str, list[dict]]:
     """Search trusted healthcare websites using state['web_query']."""
 
-    web_query = state.get("web_query", "").strip()
+    web_query = (
+        state.get("web_query", "").strip()
+        or state.get("rag_query", "").strip()
+        or state.get("user_query", "").strip()
+    )
 
     if not web_query:
         return {"web_results": []}

@@ -33,3 +33,35 @@ def route_after_rag_retriever(state: GraphState) -> str:
         return "web_search"
 
     return "evidence_evaluator"
+
+
+def route_after_web_search(state: GraphState) -> str:
+    if (
+        state.get("route") == "rag_only"
+        and state.get("has_enough_evidence") is False
+    ):
+        return "answer_generator"
+
+    return "evidence_evaluator"
+
+
+def route_after_evidence_evaluator(state: GraphState) -> str:
+    """Route weak rag_only evidence to web search once; otherwise answer."""
+
+    if (
+        state.get("route") == "rag_only"
+        and state.get("has_enough_evidence") is False
+        and not state.get("web_results")
+    ):
+        return "web_search"
+
+    return "answer_generator"
+
+
+def route_after_answer_verifier(state: GraphState) -> str:
+    """Route passed/finalized answers to END; unsafe answers to revision."""
+
+    if state.get("verification_status") == "revise" and not state.get("final_answer"):
+        return "answer_revision"
+
+    return "end"
